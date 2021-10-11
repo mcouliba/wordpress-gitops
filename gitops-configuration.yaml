@@ -2,7 +2,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: argocd
-  namespace: openshift-gitops
+  namespace: wordpress-prod
   labels:
     app.kubernetes.io/instance: wordpress-gitops-prod
 subjects:
