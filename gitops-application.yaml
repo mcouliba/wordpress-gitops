@@ -13,3 +13,7 @@ spec:
     path: .
     repoURL: 'https://github.com/mcouliba/wordpress-gitops'
     targetRevision: 'test'
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

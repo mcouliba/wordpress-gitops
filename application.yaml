@@ -13,6 +13,15 @@ spec:
     chart: wordpress
     repoURL: 'https://mcouliba.github.io/helm-charts'
     targetRevision: 0.1.0
+    helm:
+      parameters:
+        - name: deployment.mode
+          value: DEV
+        - name: image.repository
+          value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
+        - name: image.tag
+          value: '1.0'
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
+      - PruneLast=true
