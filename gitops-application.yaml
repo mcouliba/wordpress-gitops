@@ -1,9 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: wordpress-gitops-test
+  name: wordpress-gitops-prod
   labels:
-    app.kubernetes.io/instance: wordpress-gitops-test
+    app.kubernetes.io/instance: wordpress-gitops-prod
 spec:
   destination:
     namespace: openshift-gitops
@@ -12,7 +12,7 @@ spec:
   source:
     path: .
     repoURL: 'https://github.com/mcouliba/wordpress-gitops'
-    targetRevision: 'test'
+    targetRevision: 'prod'
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
