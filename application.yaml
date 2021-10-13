@@ -21,7 +21,3 @@ spec:
           value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
         - name: image.tag
           value : '2.0'
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-      - PruneLast=true
