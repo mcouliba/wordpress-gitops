@@ -1,0 +1,29 @@
+== Setup
+
+
+oc new-project wordpress
+oc apply -f .
+oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/test/gitops-application.yaml
+oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/prod/gitops-application.yaml
+
+oc create namespace wordpress-test
+oc policy add-role-to-user \
+    system:image-puller system:serviceaccount:wordpress-test:default -n wordpress
+
+oc create namespace wordpress-prod
+oc policy add-role-to-user \
+    system:image-puller system:serviceaccount:wordpress-prod:default -n wordpress
+
+oc patch argocd openshift-gitops -p '{"spec":{"server":{"insecure": "true"}}}' -n openshift-gitops
+
+#TODO: ssh-keygen -C "openshift/repo@github" -f repo-at-github -N ''
+#TODO: add the repo-at-github.pub content in your GitHub SSH Keys
+oc create secret generic repo-at-github --type=kubernetes.io/ssh-auth --from-file=ssh-privatekey=/Users/mcouliba/.ssh/tekton -n wordpress
+oc annotate secret repo-at-github tekton.dev/git-0=github.com -n wordpress
+oc secrets link pipeline repo-at-github -n wordpress
+
+tkn pipeline start cicd-pipeline -n wordpress \
+    --param=target-tag=2.0 \
+    --workspace name=source-code,claimName=source-code \
+    --workspace name=gitops-test-clone,claimName=gitops-test-code \
+    --workspace name=gitops-prod-clone,claimName=gitops-prod-code
