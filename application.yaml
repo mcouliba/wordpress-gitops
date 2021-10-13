@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: wordpress-test
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
   labels:
     app.kubernetes.io/instance: wordpress-gitops-test
 spec:
