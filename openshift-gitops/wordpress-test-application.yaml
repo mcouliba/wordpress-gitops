@@ -2,8 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: wordpress-test
-  labels:
-    app.kubernetes.io/instance: wordpress-gitops-test
 spec:
   destination:
     namespace: wordpress-test
