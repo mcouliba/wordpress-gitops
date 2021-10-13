@@ -22,4 +22,4 @@ spec:
         - name: image.repository
           value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
         - name: image.tag
-          value: '2.0'
+          value: '3.0'
