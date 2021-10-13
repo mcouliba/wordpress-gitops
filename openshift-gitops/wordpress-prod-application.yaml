@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wordpress-prod
+  labels:
+    app.kubernetes.io/instance: wordpress-gitops-prod
+spec:
+  destination:
+    namespace: wordpress-prod
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    chart: wordpress
+    repoURL: 'https://mcouliba.github.io/helm-charts'
+    targetRevision: 0.1.0
+    helm:
+      parameters:
+        - name: deployment.mode
+          value: PROD
+        - name: image.repository
+          value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
+        - name: image.tag
+          value: '3.0'
