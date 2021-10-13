@@ -20,7 +20,7 @@ spec:
         - name: image.repository
           value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
         - name: image.tag
-          value: '1.0'
+          value : '2.0'
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
