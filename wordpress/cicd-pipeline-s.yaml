@@ -1,0 +1,277 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cicd-pipeline-s
+  namespace: wordpress
+spec:
+  params:
+    - default: '1.0'
+      name: target-tag
+      type: string
+  tasks:
+    - name: source-clone
+      params:
+        - name: url
+          value: 'https://github.com/wordpress/wordpress'
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: deleteExisting
+          value: 'true'
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:da1aedf0b17f2b9dd2a46edc93ff1c0582989414b902a28cd79bad8a035c9ea4
+        - name: userHome
+          value: /tekton/home
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source-code
+    - name: simu-code-analysis
+      params:
+        - name: SCRIPT
+          value: echo OK
+        - name: VERSION
+          value: latest
+      runAfter:
+        - source-clone
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: simu-build-image
+      params:
+        - name: SCRIPT
+          value: echo OK
+        - name: VERSION
+          value: latest
+      runAfter:
+        - simu-code-analysis
+      taskRef:
+        kind: ClusterTask
+        name: openshift-clien
+    - name: gitops-test-clone
+      params:
+        - name: url
+          value: 'git@github.com:mcouliba/wordpress-gitops.git'
+        - name: revision
+          value: test
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: deleteExisting
+          value: 'true'
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:da1aedf0b17f2b9dd2a46edc93ff1c0582989414b902a28cd79bad8a035c9ea4
+        - name: userHome
+          value: /tekton/home
+      runAfter:
+        - simu-code-analysis
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: gitops-test-clone
+    - name: commit-test-pr
+      params:
+        - name: BASE_IMAGE
+          value: >-
+            docker.io/alpine/git:v2.26.2@sha256:23618034b0be9205d9cc0846eb711b12ba4c9b468efdd8a59aac1d7b1a23363f
+        - name: GIT_USER_NAME
+          value: Tekton Pipeline
+        - name: GIT_USER_EMAIL
+          value: tekton@redhat.com
+        - name: GIT_SCRIPT
+          value: >-
+            eval $(ssh-agent) ssh-add ~/.ssh/id_*
+
+            sed -i "s/value: '[0-9]\.[0.9]'/value : '$(params.target-tag)'/g"
+            application.yaml
+
+            git commit --allow-empty -am "Auto Update of the image tag to
+            $(params.target-tag)"
+
+            git push origin HEAD:test
+      runAfter:
+        - simu-build-image
+        - gitops-test-clone
+      taskRef:
+        kind: ClusterTask
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: gitops-test-clone
+        - name: input
+          workspace: gitops-test-clone
+    - name: simu-int-test
+      params:
+        - name: SCRIPT
+          value: echo OK
+        - name: VERSION
+          value: latest
+      runAfter:
+        - gitops-deploy-test
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: gitops-prod-clone
+      params:
+        - name: url
+          value: 'git@github.com:mcouliba/wordpress-gitops.git'
+        - name: revision
+          value: prod
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: deleteExisting
+          value: 'true'
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:da1aedf0b17f2b9dd2a46edc93ff1c0582989414b902a28cd79bad8a035c9ea4
+        - name: userHome
+          value: /tekton/home
+      runAfter:
+        - gitops-deploy-test
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: gitops-prod-clone
+    - name: simu-perf-test
+      params:
+        - name: SCRIPT
+          value: echo OK
+        - name: VERSION
+          value: latest
+      runAfter:
+        - simu-int-test
+        - simu-security-test
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: simu-security-test
+      params:
+        - name: SCRIPT
+          value: echo OK
+        - name: VERSION
+          value: latest
+      runAfter:
+        - gitops-deploy-test
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: commit-prod-pr
+      params:
+        - name: BASE_IMAGE
+          value: >-
+            docker.io/alpine/git:v2.26.2@sha256:23618034b0be9205d9cc0846eb711b12ba4c9b468efdd8a59aac1d7b1a23363f
+        - name: GIT_SCRIPT
+          value: >-
+            eval $(ssh-agent) ssh-add ~/.ssh/id_*
+
+            sed -i "s/value: '[0-9]\.[0.9]'/value : '$(params.target-tag)'/g"
+            application.yaml
+
+            git commit --allow-empty -am "Auto Update of the image tag to
+            $(params.target-tag)"
+
+            git push origin HEAD:prod
+        - name: GIT_USER_NAME
+          value: Tekton Pipeline
+        - name: GIT_USER_EMAIL
+          value: tektom@redhat.com
+      runAfter:
+        - gitops-prod-clone
+        - simu-perf-test
+      taskRef:
+        kind: ClusterTask
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: gitops-prod-clone
+        - name: input
+          workspace: gitops-prod-clone
+    - name: gitops-update-test-config
+      params:
+        - name: application-name
+          value: wordpress-gitops-test
+        - name: revision
+          value: HEAD
+        - name: flags
+          value: '--'
+        - name: argocd-version
+          value: latest
+      runAfter:
+        - commit-test-pr
+      taskRef:
+        kind: Task
+        name: argocd-task-sync-and-wait
+    - name: gitops-deploy-test
+      params:
+        - name: application-name
+          value: wordpress-test
+        - name: revision
+          value: '0.1.0'
+        - name: flags
+          value: '--'
+        - name: argocd-version
+          value: latest
+      runAfter:
+        - gitops-update-test-config
+      taskRef:
+        kind: Task
+        name: argocd-task-sync-and-wait
+    - name: gitops-update-prod-config
+      params:
+        - name: application-name
+          value: wordpress-gitops-prod
+        - name: revision
+          value: HEAD
+        - name: flags
+          value: '--'
+        - name: argocd-version
+          value: latest
+      runAfter:
+        - commit-prod-pr
+      taskRef:
+        kind: Task
+        name: argocd-task-sync-and-wait
+    - name: gitops-deploy-prod
+      params:
+        - name: application-name
+          value: wordpress-prod
+        - name: revision
+          value: '0.1.0'
+        - name: flags
+          value: '--'
+        - name: argocd-version
+          value: latest
+      runAfter:
+        - gitops-update-prod-config
+      taskRef:
+        kind: Task
+        name: argocd-task-sync-and-wait
+  workspaces:
+    - name: source-code
+    - name: gitops-test-clone
+    - name: gitops-prod-clone
+
