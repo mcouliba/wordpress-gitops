@@ -2,9 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: wordpress-gitops-main
-  namespace: openshift-gitops
-  labels:
-    app.kubernetes.io/instance: wordpress-gitops
 spec:
   destination:
     namespace: openshift-gitops
