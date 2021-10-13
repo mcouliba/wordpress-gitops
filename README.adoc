@@ -2,9 +2,10 @@
 
 
 oc new-project wordpress
-oc apply -f .
-oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/test/gitops-application.yaml
-oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/prod/gitops-application.yaml
+oc apply -f wordpress
+oc apply -f openshift-gitops -n openshift-gitops
+oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/test/application.yaml
+oc apply -f https://raw.githubusercontent.com/mcouliba/wordpress-gitops/prod/application.yaml
 
 oc create namespace wordpress-test
 oc policy add-role-to-user \
@@ -23,7 +24,7 @@ oc annotate secret repo-at-github tekton.dev/git-0=github.com -n wordpress
 oc secrets link pipeline repo-at-github -n wordpress
 
 tkn pipeline start cicd-pipeline -n wordpress \
-    --param=target-tag=2.0 \
+    --param=target-tag=3.0 \
     --workspace name=source-code,claimName=source-code \
     --workspace name=gitops-test-clone,claimName=gitops-test-code \
     --workspace name=gitops-prod-clone,claimName=gitops-prod-code

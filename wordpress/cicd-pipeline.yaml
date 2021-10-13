@@ -109,7 +109,7 @@ spec:
           value: >-
             eval $(ssh-agent) ssh-add ~/.ssh/id_*
 
-            sed -i "s/value: '[0-9]\.[0.9]'/value : '$(params.target-tag)'/g"
+            sed -i "s/value: '[0-9]\.[0.9]'/value: '$(params.target-tag)'/g"
             application.yaml
 
             git commit --allow-empty -am "Auto Update of the image tag to
@@ -199,7 +199,7 @@ spec:
           value: >-
             eval $(ssh-agent) ssh-add ~/.ssh/id_*
 
-            sed -i "s/value: '[0-9]\.[0.9]'/value : '$(params.target-tag)'/g"
+            sed -i "s/value: '[0-9]\.[0.9]'/value: '$(params.target-tag)'/g"
             application.yaml
 
             git commit --allow-empty -am "Auto Update of the image tag to
