@@ -22,7 +22,7 @@ spec:
         - name: image.repository
           value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
         - name: image.tag
-          value: '1.0'
+          value: '2.0'
         - name: database.host
           value: 'wordpress-mariadb.production-environment.svc:3306'
         - name: database.name
