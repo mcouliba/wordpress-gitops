@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: cicd-pipeline
+  name: cicd-pipeline-s
   namespace: wordpress
 spec:
   params:
@@ -72,7 +72,7 @@ spec:
         - name: url
           value: 'git@github.com:mcouliba/wordpress-gitops.git'
         - name: revision
-          value: test
+          value: main
         - name: submodules
           value: 'true'
         - name: depth
@@ -110,12 +110,12 @@ spec:
             eval $(ssh-agent) ssh-add ~/.ssh/id_*
 
             sed -i "s/value: '[0-9]\.[0.9]'/value: '$(params.target-tag)'/g"
-            application.yaml
+            openshift-gitops/wordpress-test-application.yaml
 
             git commit --allow-empty -am "Auto Update of the image tag to
             $(params.target-tag)"
 
-            git push origin HEAD:test
+            git push origin HEAD:main
       runAfter:
         - build-image
         - gitops-test-clone
@@ -143,7 +143,7 @@ spec:
         - name: url
           value: 'git@github.com:mcouliba/wordpress-gitops.git'
         - name: revision
-          value: prod
+          value: main
         - name: submodules
           value: 'true'
         - name: depth
@@ -200,12 +200,12 @@ spec:
             eval $(ssh-agent) ssh-add ~/.ssh/id_*
 
             sed -i "s/value: '[0-9]\.[0.9]'/value: '$(params.target-tag)'/g"
-            application.yaml
+            openshift-gitops/wordpress-prod-application.yaml
 
             git commit --allow-empty -am "Auto Update of the image tag to
             $(params.target-tag)"
 
-            git push origin HEAD:prod
+            git push origin HEAD:main
         - name: GIT_USER_NAME
           value: Tekton Pipeline
         - name: GIT_USER_EMAIL
@@ -224,9 +224,9 @@ spec:
     - name: gitops-update-test-config
       params:
         - name: application-name
-          value: wordpress-gitops-test
+          value: wordpress-gitops
         - name: revision
-          value: HEAD
+          value: main
         - name: flags
           value: '--'
         - name: argocd-version
@@ -254,9 +254,9 @@ spec:
     - name: gitops-update-prod-config
       params:
         - name: application-name
-          value: wordpress-gitops-prod
+          value: wordpress-gitops
         - name: revision
-          value: HEAD
+          value: main
         - name: flags
           value: '--'
         - name: argocd-version
@@ -285,3 +285,4 @@ spec:
     - name: source-code
     - name: gitops-test-clone
     - name: gitops-prod-clone
+

@@ -215,7 +215,7 @@ spec:
         - name: application-name
           value: wordpress-gitops
         - name: revision
-          value: HEAD
+          value: main
         - name: flags
           value: '--'
         - name: argocd-version
@@ -245,7 +245,7 @@ spec:
         - name: application-name
           value: wordpress-gitops
         - name: revision
-          value: HEAD
+          value: main
         - name: flags
           value: '--'
         - name: argocd-version
