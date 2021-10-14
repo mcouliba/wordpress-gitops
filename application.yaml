@@ -23,3 +23,13 @@ spec:
           value: image-registry.openshift-image-registry.svc:5000/wordpress/wordpress
         - name: image.tag
           value: '3.0'
+        - name: database.host
+          value: 'wordpress-mariadb:3306'
+        - name: database.name
+          value: 'd29yZHByZXNzZGI='
+        - name: database.password
+          value: 'd29yZHByZXNz'
+        - name: database.root-password
+          value: 'd29yZHByZXNzLWFkbWlu'
+        - name: database.user
+          value: 'd29yZHByZXNz'
