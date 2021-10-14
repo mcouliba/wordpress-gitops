@@ -24,7 +24,7 @@ spec:
         - name: image.tag
           value: '1.0'
         - name: database.host
-          value: 'wordpress-mariadb:3306'
+          value: 'wordpress-mariadb.production-environment.svc:3306'
         - name: database.name
           value: 'd29yZHByZXNzZGI='
         - name: database.password
