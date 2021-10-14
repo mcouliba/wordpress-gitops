@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: wordpress-gitops-test
   namespace: openshift-gitops
-  labels:
-    app.kubernetes.io/instance: wordpress-gitops-test
 spec:
   destination:
     namespace: openshift-gitops
@@ -14,7 +12,3 @@ spec:
     path: .
     repoURL: 'https://github.com/mcouliba/wordpress-gitops'
     targetRevision: 'test'
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-      - PruneLast=true
